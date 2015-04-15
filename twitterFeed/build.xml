@@ -1,0 +1,25 @@
+<project>
+
+    <target name="cleanTwitter">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="Twitter/build/classes"/>
+        <javac srcdir="Twitter/src" destdir="Twitter/build/classes"/>
+    </target>
+
+    <target name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="Twitter/build/jar/twitterFeed.jar" basedir="Twitter/build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="oata.twitterFeed"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="build/jar/twitterFeed.jar" fork="true"/>
+    </target>
+
+</project>
