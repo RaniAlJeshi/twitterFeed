@@ -1,0 +1,11 @@
+Phase:	Currency
+Input: Currency Token
+Options: control = appelt
+
+Rule: CurrencyPair
+( 	
+	(({Currency.majorType==currency_unit})({Token.string == "/"})({Currency.majorType==currency_unit}))	
+	
+):tag
+-->
+:tag.CurrencyPair = {rule = "CurrencyPair"}

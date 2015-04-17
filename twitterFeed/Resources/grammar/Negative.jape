@@ -1,0 +1,18 @@
+Phase:	Negative
+Input: Currency CurPair Lookup Token
+Options: control = appelt
+
+
+/*
+	Make more than one rule where the arrangement is different. 
+	({CurPair} | {Curency} ) ( ( {Token} )*2) 
+	({Lookup.majorType=="Currency" , Lookup.minorType=="Negative"}) 
+	( {Number} | {Money} | {Percent} ) (({Time}  | {Date})*)
+*/
+Rule: Negative1
+( 	
+		( {CurPair} | {Currency} ) {Lookup.minorType=="Negative"} 
+	
+):tag
+-->
+:tag.Negative = {rule = "Negative"}

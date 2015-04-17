@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<!-- Ant build file for hands-on exercises.  Before use you must edit the
+"gate.home" property value below to point to the location of your GATE
+installation.  You will also need to install a copy of Ant 1.8.x from
+http://ant.apache.org.
+
+Put your source files under a directory called "src".  It is useful, but not
+compulsory, to use a directory structure under src which matches your Java
+package names, i.e. a class called Main in package gatecourse.module5 should
+be src/gatecourse/module5/Main.java.
+
+To compile your source files, do:
+
+ant compile
+
+To run a particular main class do (all on one line)
+
+ant -Dmainclass=gatecourse.module5.Main -Dargs="any required arguments" run
+-->
+<project name="Marketeer" basedir="." >
+  <property file="build.properties" />
+
+
+  <property name="gate.home" location="/path/to/gate" />
+
+  <property name="runtime.max.memory" value="500m" />
+
+  <property name="gate.lib" location="${gate.home}/lib" />
+  <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
+  <property name="src.dir" location="src" />
+  <property name="classes.dir" location="classes" />
+
+  <!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
+  <path id="compile.classpath">
+    <pathelement location="${gate.jar}" />
+    <fileset dir="${gate.lib}">
+      <include name="**/*.jar" />
+      <include name="**/*.zip" />
+    </fileset>
+  </path>
+
+  <!-- create build directory structure -->
+  <target name="prepare">
+    <mkdir dir="${classes.dir}" />
+  </target>
+
+  <!-- compile the source -->
+  <target name="compile" depends="prepare">
+    <javac classpathref="compile.classpath"
+           srcdir="${src.dir}"
+           destdir="${classes.dir}"
+           debug="true"
+           debuglevel="lines,source"
+           source="1.6" target="1.6" />
+  </target>
+
+  <path id="run.classpath">
+    <pathelement location="${classes.dir}" />
+    <path refid="compile.classpath" />
+  </path>
+
+  <!-- Target to run a class.  Do
+    ant -Dmainclass=some.pkg.MyClass -Dargs="command line args" run
+  -->
+  <target name="run" depends="compile">
+    <java classname="${mainclass}"
+          classpathref="run.classpath"
+          fork="true"
+          maxmemory="${runtime.max.memory}">
+      <sysproperty key="gate.home" value="${gate.home}" />
+      <arg line="${args}" />
+    </java>
+  </target>
+
+  <!-- Build JavaDoc documentation -->
+  <target name="doc.prepare">
+    <mkdir dir="${javadoc.dir}" />
+  </target>
+
+  <target name="javadoc" depends="doc.prepare">
+    <javadoc destdir="${javadoc.dir}" packagenames="*"
+             classpathref="compile.classpath"
+             encoding="UTF-8"
+             windowtitle="GATE Course Module 5 JavaDoc"
+             source="1.6">
+      <sourcepath>
+        <pathelement location="${src.dir}" />
+      </sourcepath>
+      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://jenkins.gate.ac.uk/job/GATE-Nightly/javadoc/" />
+    </javadoc>
+  </target>
+
+  <!-- remove the generated .class files -->
+  <target name="clean" >
+    <delete dir="${classes.dir}" />
+  </target>
+
+</project>
