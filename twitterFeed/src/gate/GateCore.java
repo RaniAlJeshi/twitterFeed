@@ -1,7 +1,10 @@
 package gate;
 
+import java.io.File;
+
 import gate.util.GateException;
 import gate.creole.annic.apache.lucene.document.*;
+import gate.gui.MainFrame;
 import gate.Corpus;
 import gate.Gate;
 
@@ -40,10 +43,7 @@ public class GateCore
 		
 	}
 	
-	public void addToDoc(String tweet)
-	{
-		//doc.add(tweet); 
-	}
+	
 	
 	//Getters and Setters
 	public void setDoc(Document doc)
@@ -66,7 +66,11 @@ public class GateCore
 	{
 		this.cor = cor;
 	}
-
+	
+	public void makeVisible()
+	{
+		MainFrame.getInstance().setVisible(true);
+	}
 
 
 }
