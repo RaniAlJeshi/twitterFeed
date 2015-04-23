@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- gate.xml: GATE configuration data -->
+<GATE>
+
+<!-- NOTE: the next element may be overwritten by the GUI!!! -->
+<GATECONFIG Known_plugin_path=""
+ Load_plugin_path=""
+ Main_frame_height="796"
+ Main_frame_maximized="false"
+ Main_frame_width="1245"
+ Save_options_on_exit="true"
+ Save_session_on_exit="true"
+ docedit_insert_append="true"
+/>
+
+</GATE>
