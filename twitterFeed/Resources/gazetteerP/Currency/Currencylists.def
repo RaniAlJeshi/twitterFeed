@@ -1,4 +1,9 @@
 CurrencyNegative.lst:Currency:Negative
 CurrencyPositive.lst:Currency:Positive
+CurrencyNeutral.lst:Currency:Neutral
 Discriptive_bad.lst:Currency:Negative
 Discriptive_good.lst:Currency:Positive
+Currency.lst:currency_unit:post_amount::Currency
+currency_prefix.lst:currency_unit:pre_amount
+currency_unit.lst:currency_unit:post_amount::Currency
+CurrencyPair.lst:currency_unit:currency_pair::CurrencyPair

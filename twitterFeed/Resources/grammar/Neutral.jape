@@ -1,13 +1,18 @@
-Phase:	Currency
-Input: Currency Token
+Phase:	Neutral
+Input: Currency CurPair Lookup Token
 Options: control = appelt
 
 
-
-Rule: CurrencyPair
+/*
+	Make more than one rule where the arrangement is different. 
+	({CurPair} | {Curency} ) ( ( {Token} )*2) 
+	({Lookup.majorType=="Currency" , Lookup.minorType=="Negative"}) 
+	( {Number} | {Money} | {Percent} ) (({Time}  | {Date})*)
+*/
+Rule: Neutral1
 ( 	
-	(({Currency.majorType==currency_unit})({Token.string == "/"})({Currency.majorType==currency_unit}))	
+		( {CurPair} | {Currency} ) ({Token})[1,3] {Lookup.minorType=="Neutral"} 
 	
 ):tag
 -->
-:tag.CurrencyPair = {rule = "CurrencyPair"}
+:tag.Negative = {rule = "Neutral"}

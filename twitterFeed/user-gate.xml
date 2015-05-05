@@ -5,12 +5,15 @@
 <!-- NOTE: the next element may be overwritten by the GUI!!! -->
 <GATECONFIG Known_plugin_path=""
  Load_plugin_path=""
- Main_frame_height="796"
- Main_frame_maximized="false"
- Main_frame_width="1245"
+ Main_frame_height="876"
+ Main_frame_maximized="true"
+ Main_frame_width="1555"
  Save_options_on_exit="true"
  Save_session_on_exit="true"
  docedit_insert_append="true"
+ gate.gui.docview.AnnotationSetsView.colours="{Unknown=-2134239979, Organization=-2130748838, CurrencyPair=-2130706598, VG=-2130760660, Time=-2132726559, DEFAULT_TOKEN=-2130748838, Date=-2141562113, UrlPre=-2146055659, A_PositiveAdjectives=-2141520038, A_NegativeAdjectives=-2130748838, TempYear=-2141562113, TempTime=-2130706598, Percent=-2132726740, Identifier=-2130748838, Currency=-2141520038, FirstPerson=-2130748838, Money=-2130706598, Number=-2141519873, Location=-2130706598, Token=-2144542239, SpaceToken=-2132680404, TempIdentifier=-2141520038, Negative=-2130748838, Split=-2144588575, _New_=-2138644180, Address=-2130748838, Sentence=-2144542420, Lookup=-2130748673, JobTitle=-2141520038, Person=-2141562113}"
+ gate.gui.docview.AnnotationSetsView.types="[._New_, .A_NegativeAdjectives, .Sentence, .CurrencyPair]"
+ gate.swing.XJFileChooser="{lastapplication=/home/rani/git/twitterFeed/twitterFeed/Resources/Golder.gapp, application.Golder=/home/rani/git/twitterFeed/twitterFeed/Resources/Golder.gapp, application.ReadyMade=/home/rani/git/twitterFeed/twitterFeed/Resources/Golder.gapp, applications=ReadyMade;Golder;}"
 />
 
 </GATE>

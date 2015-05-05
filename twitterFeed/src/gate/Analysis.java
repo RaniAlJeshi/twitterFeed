@@ -2,9 +2,7 @@ package gate;
 
 import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
-import gate.creole.SerialController;
-import gate.creole.annotdelete.AnnotationDeletePR;
-import gate.gui.MainFrame;
+
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
 import gate.Document;
@@ -26,7 +24,7 @@ public class Analysis {
 
 	static long lastTweetID;
 	
-	private static List getTweets()
+	private static List<Status> getTweets()
 	{
 		
 		List<Status> tweets = null; 
@@ -39,7 +37,7 @@ public class Analysis {
 		try {
 			tweets = twitter.getHomeTimeline();
 			lastTweetID = tweets.get(tweets.size()-1).getId(); 
-			twitterFeed feed = new twitterFeed(); 
+			//twitterFeed feed = new twitterFeed(); 
 			twitterStream.getStreamS(lastTweetID);
 			
 		} catch (TwitterException e) {
@@ -56,7 +54,10 @@ public class Analysis {
 		StringBuffer sb = new StringBuffer();
 		Document doc = null; 
 		for(int i = 0; i< list.size(); i++)
-			sb.append(list.get(i)+"\n"); 
+		{
+			Status tweet = list.get(i);
+			sb.append("@" + "ID: "+tweet.getId() + "- User: " +tweet.getUser().getScreenName() + " - Text: " + tweet.getText() +"\r\n");
+		}
 		try {
 			doc = Factory.newDocument(sb.toString());
 			//System.out.println(sb.toString());			
@@ -67,10 +68,10 @@ public class Analysis {
 		}
 		return doc;
 	}
-	private void initGate()
+	/*private void initGate()
 	{
 		
-	}
+	}*/
 	public static void main(String[] args) throws GateException, TwitterException, IOException
 	{
 		try {
@@ -79,24 +80,15 @@ public class Analysis {
 	        Gate.setSiteConfigFile(new File("gate.xml"));
 	        GateCore gateCore = new GateCore();
 	        gateCore.makeVisible(); 
-	        /*Make new Piple line ... U have all the resources.*/ 
-			//File plugins = new File("plugins");
-			
-			//System.out.println("The Path:" + plugins.getAbsolutePath()); 
-			
-			//Gate.setPluginsHome(plugins);/twitterFeed/Resources/Golder.gapp
+	        
 			File gappFile = new File("Resources/Golder.gapp");
 			Corpus cor = Factory.newCorpus("Cor1");
 			Document d = createDoc(getTweets());
 			cor.add(d);
-			CorpusController pipeLine = (CorpusController)PersistenceManager.loadObjectFromFile(gappFile);
+			
+			SerialAnalyserController pipeLine = (SerialAnalyserController)PersistenceManager.loadObjectFromFile(gappFile);
 			pipeLine.setName("ReadyMade");
-			/*while(pipeLine.getPRs().iterator().hasNext())
-			{
-				pipeLine.getPRs().iterator().next(); 
-			}*/
-			//pipeLine.setDocument(d);
-			//((CorpusController) pipeLine).setCorpus(cor);
+			pipeLine.setCorpus(cor);
 			Gate.setExecutable(pipeLine);
 			Gate.getExecutable().execute();
 			

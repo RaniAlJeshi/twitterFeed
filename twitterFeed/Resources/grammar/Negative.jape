@@ -11,7 +11,7 @@ Options: control = appelt
 */
 Rule: Negative1
 ( 	
-		( {CurPair} | {Currency} ) {Lookup.minorType=="Negative"} 
+		( {CurPair} | {Currency} ) ({Token})[1,3] {Lookup.minorType=="Negative"} 
 	
 ):tag
 -->
