@@ -1,4 +1,5 @@
-small&category=negative
-tiny&category=negative
-sell&category=negative
-Sell&category=negative
+small&kind=negative
+tiny&kind=negative
+loss&kind=negative
+low&kind=negative
+drops&kind=negative

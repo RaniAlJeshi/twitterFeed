@@ -5,46 +5,12 @@ Options: control = appelt
 Rule: DetectingAdjective //Make each with pos or neg The other thing the have to be with each kind
 
 ( 	
-	(
-		(
-		({Token.string=="no"})
-		|
-		({Token.string=="not"})
-		|
-		({Token.string=="too"})
-		|
-		({Token.string=="non"})
-		|
-		({Token.string=="none"})
-		|
-		({Token.string=="n't"})
-		|
-		({Token.string=="nothing"})
-		|
-		({Token.string == "neither"})
-		|
-		({Token.string == "never"})
-		|
-		(
-		 	(
-		  		({Token.string == "would"})|({Token.string == "could"})|({Token.string == "can"})|({Token.string == "will"})
-		  	)
-			({Token.string == "be"})
-			)
-		)
-		
-		({Token.kind == word})?
-
-		(
-		({Lookup.minorType == "Negative"})
-		) 
-	)
-
-	|
-	({Lookup.minorType == "Positive"})
+	
+	//({Token.kind == word})?
+	//({Lookup.minorType == "Positive"})
 ):tag
 -->
-:tag.A_PositiveAdjectives = {rule = "Fact_Pos"}
+:tag.Positive = {rule = "Fact_Pos"}
 
 
 
@@ -74,4 +40,4 @@ Rule: PolarityNeg
 
 ):tag
 -->
-:tag.A_NegativeAdjectives = {rule = "Fact_Neg"}
+:tag.Negative = {rule = "Fact_Neg"}

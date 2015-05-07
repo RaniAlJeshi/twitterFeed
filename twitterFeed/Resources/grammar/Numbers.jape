@@ -1,0 +1,14 @@
+Phase: Numbers
+
+Input: Token Number Split
+Options: control = appelt
+
+Rule: NUMBER_FULL
+({Token.kind == number} 
+	(
+		({Token.string == ","} | {Token.string == "."}) 
+		{Token.kind == number} 
+	)
+):tag
+-->
+:tag.Numbers = {rule = "Numbers"}

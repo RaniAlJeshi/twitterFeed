@@ -1,7 +1,8 @@
-MultiPhase:	Marketeer
+MultiPhase:	Golder
 Phases: 	
+tweetID
 Currency
 Negative
 Positive
 Neutral
-FactExtract
+SenticeExtract

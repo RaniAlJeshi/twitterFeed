@@ -1,6 +1,11 @@
-topper&category=positive
-buy&category=positive
-Buy&category=positive
+topper&kind=positive
+buy&kind=positive
 big&kind=positive
 huge&kind=positive
 rise&kind=positive
+sell&kind=positive
+short&kind=positive
+long&kind=positive
+high&kind=positive
+rises&kind=positive
+shoots up&kind=positive

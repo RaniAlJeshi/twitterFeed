@@ -1,0 +1,15 @@
+Phase:	SentenceEctract
+Input: PositiveSignal NegativeSignal NeutralSignal Sentence
+Options: control = appelt
+
+Rule: SentenceEctract1
+( 	
+		  ({Sentence contains {PositiveSignal.kind == "Signal"}})
+		  | 
+		  ({Sentence contains {NegativeSignal.kind == "Signal"}})
+		  | 
+		  ({Sentence contains {NeutralSignal.kind == "Signal"}})
+	
+):tag
+-->
+:tag.SentenceSignal = {rule = "SentenceEctract"}

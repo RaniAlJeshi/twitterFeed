@@ -1,0 +1,13 @@
+Phase:	tweetID
+Input: Token
+Options: control = appelt
+
+Rule: tweetID1
+( 	
+		{Token.string == "ID"} {Token.string == ":"}
+		({Token.kind == "number"}) :IDofTweet 
+	
+):tag
+-->
+:IDofTweet.tweetID = {rule = "tweetID"},
+:tag.IDofTweet = {rule = "tweetID"}

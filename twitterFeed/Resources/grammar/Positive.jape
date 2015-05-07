@@ -1,18 +1,20 @@
 Phase:	Positive
-Input: Currency CurPair Lookup Token
+Input: Currency CurrencyPair Lookup Token
 Options: control = appelt
 
-
-/*
-	Make more than one rule where the arrangement is different. 
-	({CurPair} | {Curency} ) ( ( {Token} )*2) 
-	({Lookup.majorType=="Currency" , Lookup.minorType=="Negative"}) 
-	( {Number} | {Money} | {Percent} ) (({Time}  | {Date})*)
-*/
-Rule: Positive1
+Rule: PositiveWord
 ( 	
-		( {CurPair} | {Currency} ) ({Token})[1,3] {Lookup.minorType=="Positive"} 
+		({Lookup.minorType=="Positive"} | {Lookup.kind=="positive"}) 
 	
 ):tag
 -->
-:tag.Negative = {rule = "Negative"}
+:tag.PositiveWord = {rule = "Positive"}
+
+Rule: PositiveSignal
+( 	
+		(( {CurrencyPair} | {Currency} ) ({Token})[0,4] {Lookup.minorType=="Positive"}) | 
+		({Lookup.minorType=="Positive"} ({Token})[0,4] ({CurrencyPair} | {Currency} )) 
+		
+):tag
+-->
+:tag.PositiveSignal = {kind = "Signal", rule = "PositiveSignal"}
