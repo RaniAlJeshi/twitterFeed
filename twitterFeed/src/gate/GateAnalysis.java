@@ -8,14 +8,9 @@ import gate.Document;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -26,7 +21,7 @@ import twitterFeed.twitterFeed;
  * This class to get the tweets form twitter with lastID and analyze them one by one before getting the next patch of 
  * tweets. 
  */
-public class Analysis {
+public class GateAnalysis {
 
 	public static long lastTweetID;
 	public static List<Signal> signals; 
@@ -42,7 +37,7 @@ public class Analysis {
 	}
 
 	public static void setLastTweetID(long lastTweetID) {
-		Analysis.lastTweetID = lastTweetID;
+		GateAnalysis.lastTweetID = lastTweetID;
 	}
 	
 	/**
@@ -70,6 +65,7 @@ public class Analysis {
 		} catch (TwitterException e) {
 			e.printStackTrace();
 			System.out.println("Twitter Exception Error: " + e.getMessage());
+			//TODO Get the twitter exception related to time then add a time off before fetchin next patch.  
 		}
 		
 		return tweets; 
@@ -174,6 +170,7 @@ public class Analysis {
 		return t;
 		
 	}
+	@SuppressWarnings("deprecation")
 	private static List<Signal> getSignals(AnnotationSet signalsAnnot, List<Status> tweets, Document doc){
 		
 		AnnotationSet tweetsIDs = doc.getAnnotations().get("tweetID");
@@ -232,7 +229,8 @@ public class Analysis {
 					
 					signal.setSignalValue(currentTweet.getRetweetCount());
 					signal.setDateOfTweet(currentTweet.getCreatedAt());
-					//TODO fix the Logic with factual dates and times. 
+					//TODO fix the Logic with factual dates and times.
+					//TODO Fix the date time deprecated methods. 
 				    Date date = new Date();
 					signal.setTimeOfExcute(date);
 					date.setHours(date.getHours() + shortExcution); 
@@ -250,12 +248,19 @@ public class Analysis {
 	public static void main(String[] args){
 		try {
 			NLP_Process();
-			//populateSignals(); 
 			
-		} catch (GateException | TwitterException | IOException e) {
-			// TODO Auto-generated catch block
+		} catch (GateException e){
+			System.out.println("Gate Excution Error in Main: " + e.getMessage());
 			e.printStackTrace();
-		} 
+		} catch( TwitterException e){
+			System.out.println("Twitter Excution Error in Main: " + e.getMessage());
+			e.printStackTrace();
+		} catch(IOException e) {
+			System.out.println("IOExcution Error in Main: " + e.getMessage());
+			e.printStackTrace();
+		}
+		
+		 
 	}
 	
 }
