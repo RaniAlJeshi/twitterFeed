@@ -8,9 +8,14 @@ import gate.Document;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+
+import org.apache.james.mime4j.dom.datetime.DateTime;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -24,10 +29,13 @@ import twitterFeed.twitterFeed;
 public class Analysis {
 
 	public static long lastTweetID;
-	public List<Signal> signals; 
+	public static List<Signal> signals; 
 	static Corpus cor;
 	static File gappFile = new File("Resources/Golder.gapp");
 	static Boolean gateInit = false; 
+	static final int shortExcution = 2;
+	static final int mediumExcution = 12;
+	static final int longExcution = 24;
 	
 	public static long getLastTweetID() {
 		return lastTweetID;
@@ -60,9 +68,8 @@ public class Analysis {
 			twitterStream.getStreamS(getLastTweetID());
 			
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("Error 001: " + e.getMessage());
+			System.out.println("Twitter Exception Error: " + e.getMessage());
 		}
 		
 		return tweets; 
@@ -92,7 +99,7 @@ public class Analysis {
 			//System.out.println(sb.toString());			
 			
 		} catch (ResourceInstantiationException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Document Couldn't Start Error: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return doc;
@@ -127,52 +134,118 @@ public class Analysis {
 		if(gateInit == false)
 			initGate();
 		
-		try {//Add a while loop 
-			List<Status> tweetsRaw = getTweets(); 
-			Document d = createDoc(tweetsRaw);
-			cor.add(d);
-			SerialAnalyserController pipeLine = (SerialAnalyserController)PersistenceManager.loadObjectFromFile(gappFile);
-			pipeLine.setName("ReadyMade");
-			pipeLine.setCorpus(cor);
+		List<Status> tweetsRaw = getTweets(); 
+		Document d = createDoc(tweetsRaw);
+		cor.add(d);
+		SerialAnalyserController pipeLine = (SerialAnalyserController)PersistenceManager.loadObjectFromFile(gappFile);
+		pipeLine.setName("ReadyMade");
+		pipeLine.setCorpus(cor);
+		try {
 			Gate.setExecutable(pipeLine);
 			Gate.getExecutable().execute();
-			
-			//Take the info from gate and populate Signal List...
-			
-			AnnotationSet sentenceSignal = d.getAnnotations("SentenceSignal"); 
-			for(int j = 0; j > sentenceSignal.size(); j++){
-				Signal signal = new Signal();
-				Status currentTweet ; 
-				Long sentencID  = Long.getLong(sentenceSignal.get(0).getId()+""); 
-				//Exclude Repititives 
-				while(tweetsRaw.iterator().hasNext()){
-					currentTweet = tweetsRaw.iterator().next();
-					if(currentTweet.getId() == sentencID)
-					{
-						signal.setTweetID(sentenceSignal.get(0)+"");
-						signal.getDateOfTweet();
-						signal.setDateOfTweet(currentTweet.getCreatedAt());
-						signal.setTextBody(sentenceSignal.get("PositiveSignal").toString());// or NegativeSignal ..polarity. 
-						signal.setCurrency(sentenceSignal.get("CurrencyPair").toString());
-						signal.setSignalValue(currentTweet.getRetweetCount());
-						//tweetsRaw.remove(currentTweet);
-					}
-					 
+		} catch (GateException e) {
+			System.out.println("Gate Excution Error: " + e.getMessage());
+			e.printStackTrace();
+		} catch(IndexOutOfBoundsException e){
+			System.out.println("Gate Out of Bound Excution Error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		tweetsRaw = excludeRepititve(tweetsRaw);
+		AnnotationSet sentenceSignal = d.getAnnotations().get("SentenceSignal");
+		getSignals(sentenceSignal, tweetsRaw, d);
+		
+	}
+	private static List<Status> excludeRepititve(List<Status> t){
+		
+		Iterator<Status> t1 = t.iterator(); 
+		Iterator<Status> t2 = t.iterator();
+		while(t1.hasNext())
+		{
+			Status s1 = (Status) t1.next();
+			while(t2.hasNext()){
+				Status s2 = (Status) t2.next();
+				if(s1.getId()!= s2.getId() && s1.getText().equals(s2.getText()))
+				{	
+					t.remove(t.indexOf(s1));
+					t.get(t.indexOf(s2));
 				}
 			}
+		}
+		return t;
+		
+	}
+	private static List<Signal> getSignals(AnnotationSet signalsAnnot, List<Status> tweets, Document doc){
+		
+		AnnotationSet tweetsIDs = doc.getAnnotations().get("tweetID");
+		AnnotationSet currencyPair = doc.getAnnotations().get("CurrencyPair");
+		AnnotationSet currency = doc.getAnnotations().get("Currency");
+		AnnotationSet positiveSignal = doc.getAnnotations().get("PositiveSignal");
+		AnnotationSet negativeSignal = doc.getAnnotations().get("NegativeSignal");
+		AnnotationSet neutralSignal = doc.getAnnotations().get("NeutralSignal");
+		String signalText; 
+		for(Annotation annot : signalsAnnot){
+			Signal signal = new Signal();
+			Status currentTweet ; 
+			AnnotationSet tweetSpecificID = gate.Utils.getContainedAnnotations(tweetsIDs, annot);
 			
-			
-			
-		} catch (GateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+			String sentencID  = gate.Utils.stringFor(doc, tweetSpecificID);
+			for(int e =0; e < tweets.size() - 1; e++){
+				// TODO Add more fields 
+				currentTweet = tweets.get(e);
+				if(currentTweet.getId() == Long.parseLong(sentencID))
+				{
+					signal.setTweetID(sentencID+"");
+					signal.setDateOfTweet(currentTweet.getCreatedAt());
+					if(gate.Utils.getContainedAnnotations(positiveSignal, annot) != null)
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(positiveSignal, annot);
+						AnnotationSet s1 = gate.Utils.getOverlappingAnnotations(positiveSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(true);
+					}
+					else if (gate.Utils.getContainedAnnotations(negativeSignal, annot) != null)
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(negativeSignal, annot);
+						AnnotationSet s1 = gate.Utils.getOverlappingAnnotations(negativeSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(false);
+					}
+					else
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(neutralSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(null);
+					}
+					signal.setTextBody(signalText);// or NegativeSignal ..polarity. 
+					if(gate.Utils.getContainedAnnotations(currencyPair, annot) != null)
+					{
+						AnnotationSet c = gate.Utils.getContainedAnnotations(currencyPair, annot);
+						signalText = gate.Utils.stringFor(doc, c);
+						signal.setCurrency(signalText);
+					}
+					else
+					{
+						AnnotationSet c = gate.Utils.getContainedAnnotations(currency, annot);
+						signalText = gate.Utils.stringFor(doc, c);
+						signal.setCurrency(signalText);
+					}
+					
+					signal.setSignalValue(currentTweet.getRetweetCount());
+					signal.setDateOfTweet(currentTweet.getCreatedAt());
+					//TODO fix the Logic with factual dates and times. 
+				    Date date = new Date();
+					signal.setTimeOfExcute(date);
+					date.setHours(date.getHours() + shortExcution); 
+					signal.setTimeOfDexcute(date);
+					signals.add(signal);
+				}
+				 
+			}
+		}
+		return signals;
 	}
 	
 	
-	/*public static void populateSignals(){
-		
-	}*/
 	
 	public static void main(String[] args){
 		try {

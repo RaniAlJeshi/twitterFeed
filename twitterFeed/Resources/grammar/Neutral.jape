@@ -12,8 +12,8 @@ Rule: NeutralWord
 
 Rule: NeutralSignal
 ( 	
-		(( {CurrencyPair} | {Currency} ) ({Token})[0,4] {Lookup.minorType=="Neutral"}) |
-		(  {Lookup.minorType=="Neutral"} ({Token})[0,4] ( {CurrencyPair} | {Currency} ))
+		(( {CurrencyPair} | {Currency} ) ({Token})[0,6] {Lookup.minorType=="Neutral"}) |
+		(  {Lookup.minorType=="Neutral"} ({Token})[0,6] ( {CurrencyPair} | {Currency} ))
 		 
 ):tag
 -->
