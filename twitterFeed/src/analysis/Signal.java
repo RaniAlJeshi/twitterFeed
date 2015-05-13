@@ -1,4 +1,4 @@
-package gate;
+package analysis;
 
 import java.util.Date;
 
@@ -11,6 +11,8 @@ public class Signal{
 	private Date timeOfDexcute; 
 	private Integer signalValue;
 	private String tweetID; 
+	private double startNumber; 
+	private double stopNumber; 
 	
 	public Signal(){
 		
@@ -78,4 +80,21 @@ public class Signal{
 	public void setSignalValue(Integer signalValue) {
 		this.signalValue = signalValue;
 	} 
+	public double getStartNumber() {
+		return startNumber;
+	}
+
+	public void setStartNumber(double startNumber) {
+		this.startNumber = startNumber;
+	}
+
+	public double getStopNumber() {
+		return stopNumber;
+	}
+
+	public void setStopNumber(double stopNumber) {
+		this.stopNumber = stopNumber;
+	}
+	
+	
 }

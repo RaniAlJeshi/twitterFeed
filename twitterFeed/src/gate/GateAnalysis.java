@@ -8,10 +8,12 @@ import gate.Document;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import analysis.Signal;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -24,7 +26,7 @@ import twitterFeed.twitterFeed;
 public class GateAnalysis {
 
 	public static long lastTweetID;
-	public static List<Signal> signals; 
+	public static List<Signal> signals = new ArrayList<Signal>(); //TODO Change this to Graph. 
 	static Corpus cor;
 	static File gappFile = new File("Resources/Golder.gapp");
 	static Boolean gateInit = false; 
@@ -40,6 +42,9 @@ public class GateAnalysis {
 		GateAnalysis.lastTweetID = lastTweetID;
 	}
 	
+	public static List<Signal> getSignals() {
+		return signals;
+	}
 	/**
 	 * Getting tweets from tweeter. 
 	 * If lastTweetID exist it will pull tweets from that ID otherwise it will 
@@ -125,7 +130,7 @@ public class GateAnalysis {
 	 * @throws TwitterException
 	 * @throws IOException
 	 */
-	public static void NLP_Process() throws GateException, TwitterException, IOException
+	public static boolean NLP_Process() throws GateException, TwitterException, IOException
 	{
 		if(gateInit == false)
 			initGate();
@@ -150,6 +155,7 @@ public class GateAnalysis {
 		AnnotationSet sentenceSignal = d.getAnnotations().get("SentenceSignal");
 		getSignals(sentenceSignal, tweetsRaw, d);
 		
+		return true; 
 	}
 	private static List<Status> excludeRepititve(List<Status> t){
 		
@@ -242,25 +248,4 @@ public class GateAnalysis {
 		}
 		return signals;
 	}
-	
-	
-	
-	public static void main(String[] args){
-		try {
-			NLP_Process();
-			
-		} catch (GateException e){
-			System.out.println("Gate Excution Error in Main: " + e.getMessage());
-			e.printStackTrace();
-		} catch( TwitterException e){
-			System.out.println("Twitter Excution Error in Main: " + e.getMessage());
-			e.printStackTrace();
-		} catch(IOException e) {
-			System.out.println("IOExcution Error in Main: " + e.getMessage());
-			e.printStackTrace();
-		}
-		
-		 
-	}
-	
 }
