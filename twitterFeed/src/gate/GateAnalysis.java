@@ -13,7 +13,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import analysis.Signal;
+import analysis.SignalNode;
+import analysis.SignalsDecider;
+import twitter4j.JSONException;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -25,33 +27,34 @@ import twitterFeed.twitterFeed;
  */
 public class GateAnalysis {
 
-	public static long lastTweetID;
-	public static List<Signal> signals = new ArrayList<Signal>(); //TODO Change this to Graph. 
-	static Corpus cor;
-	static File gappFile = new File("Resources/Golder.gapp");
-	static Boolean gateInit = false; 
+	public  long lastTweetID;
+	private List<SignalNode> signals = new ArrayList<SignalNode>(); 
+	SignalNode tempSignal; 
+	Corpus cor;
+	File gappFile = new File("Resources/Golder.gapp");
+	Boolean gateInit = false; 
+	
+	//TODO Change to properties file golder.properties.
 	static final int shortExcution = 2;
 	static final int mediumExcution = 12;
 	static final int longExcution = 24;
 	
-	public static long getLastTweetID() {
+	public  long getLastTweetID() {
 		return lastTweetID;
 	}
 
-	public static void setLastTweetID(long lastTweetID) {
-		GateAnalysis.lastTweetID = lastTweetID;
+	public  void setLastTweetID(long lastTweetID) {
+		this.lastTweetID = lastTweetID;
 	}
 	
-	public static List<Signal> getSignals() {
-		return signals;
-	}
+	
 	/**
 	 * Getting tweets from tweeter. 
 	 * If lastTweetID exist it will pull tweets from that ID otherwise it will 
 	 * pull recent 20 tweets in my time line.  
 	 * @return list<status> tweets. 
 	 */
-	private static List<Status> getTweets()
+	private  List<Status> getTweets()
 	{
 		
 		List<Status> tweets = null; 
@@ -83,7 +86,7 @@ public class GateAnalysis {
 	 * @param list
 	 * @return gate Document doc
 	 */
-	private static Document createDoc(List<Status> list)
+	private  Document createDoc(List<Status> list)
 	{
 		StringBuffer sb = new StringBuffer();
 		Document doc = null; 
@@ -110,7 +113,7 @@ public class GateAnalysis {
 	 * Initialize gate for first time. 
 	 * @throws GateException
 	 */
-	private static void initGate() throws GateException
+	private  void initGate() throws GateException
 	{
 		Gate.setUserConfigFile(new File("user-gate.xml")); 
         Gate.setSiteConfigFile(new File("gate.xml"));
@@ -122,6 +125,103 @@ public class GateAnalysis {
         
 	}
 	
+	//TODO Refactor;
+	private  List<Status> excludeRepititve(List<Status> t){
+		
+		Iterator<Status> t1 = t.iterator(); 
+		Iterator<Status> t2 = t.iterator();
+		while(t1.hasNext())
+		{
+			Status s1 = (Status) t1.next();
+			while(t2.hasNext()){
+				Status s2 = (Status) t2.next();
+				if(s1.getId()!= s2.getId() && s1.getText().equals(s2.getText()))
+				{	
+					t.remove(t.indexOf(s1));
+					t.get(t.indexOf(s2));
+				}
+			}
+		}
+		return t;
+		
+	}
+	@SuppressWarnings("deprecation")
+	private  List<SignalNode> getSignals(AnnotationSet signalsAnnot, List<Status> tweets, Document doc){
+		
+		AnnotationSet tweetsIDs = doc.getAnnotations().get("tweetID");
+		AnnotationSet currencyPair = doc.getAnnotations().get("CurrencyPair");
+		AnnotationSet currency = doc.getAnnotations().get("Currency");
+		AnnotationSet positiveSignal = doc.getAnnotations().get("PositiveSignal");
+		AnnotationSet negativeSignal = doc.getAnnotations().get("NegativeSignal");
+		AnnotationSet neutralSignal = doc.getAnnotations().get("NeutralSignal");
+		String signalText; 
+		for(Annotation annot : signalsAnnot){
+			SignalNode signal = new SignalNode();
+			Status currentTweet ; 
+			AnnotationSet tweetSpecificID = gate.Utils.getContainedAnnotations(tweetsIDs, annot);
+			String sentencID = "000"; 
+			try{
+				sentencID = gate.Utils.stringFor(doc, tweetSpecificID);
+			}catch(NullPointerException e){
+				System.out.println("Null Point Exception in reading TweetID \r\n" + e.getMessage() + "\r\n The Value is: " + tweetSpecificID.toString());
+			}
+			for(int e =0; e < tweets.size() - 1; e++){
+				// TODO Add more fields 
+				currentTweet = tweets.get(e);
+				if(currentTweet.getId() == Long.parseLong(sentencID))
+				{
+					signal.setTweetID(sentencID+"");
+					signal.setDateOfTweet(currentTweet.getCreatedAt());
+					if(gate.Utils.getContainedAnnotations(positiveSignal, annot).size() != 0)
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(positiveSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(true);
+					}
+					else if (gate.Utils.getContainedAnnotations(negativeSignal, annot).size() != 0)
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(negativeSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(false);
+					}
+					else
+					{
+						AnnotationSet s = gate.Utils.getContainedAnnotations(neutralSignal, annot);
+						signalText = gate.Utils.stringFor(doc, s);
+						signal.setPolarity(null);
+					}
+					signal.setTextBody(signalText);// or NegativeSignal ..polarity. 
+					if(gate.Utils.getContainedAnnotations(currencyPair, annot).size() != 0)
+					{
+						AnnotationSet c = gate.Utils.getContainedAnnotations(currencyPair, annot);
+						signalText = gate.Utils.stringFor(doc, c);
+						signal.setCurrency(signalText);
+					}
+					else
+					{
+						AnnotationSet c = gate.Utils.getContainedAnnotations(currency, annot);
+						signalText = gate.Utils.stringFor(doc, c);
+						signal.setCurrency(signalText);
+					}
+					
+					signal.setSignalValue(currentTweet.getRetweetCount());
+					signal.setDateOfTweet(currentTweet.getCreatedAt());
+					//TODO fix the Logic with factual dates and times.
+					//TODO Fix the date time deprecated methods. 
+				    Date date = new Date();
+				    Date date2 = new Date();
+					signal.setTimeOfExcute(date);
+					date2.setHours(date2.getHours() + shortExcution); 
+					signal.setTimeOfDexcute(date2);
+					signals.add(signal); 
+						
+				}
+				 
+			}
+		}
+		return signals;
+	}
+	
 	/**
 	 * This will analys the patch of tweets from lastTweetedId or
 	 * recent 20 tweets. 
@@ -129,8 +229,9 @@ public class GateAnalysis {
 	 * @throws GateException
 	 * @throws TwitterException
 	 * @throws IOException
+	 * @throws JSONException 
 	 */
-	public static boolean NLP_Process() throws GateException, TwitterException, IOException
+	public  List<SignalNode> NLP_Process() throws GateException, TwitterException, IOException, JSONException
 	{
 		if(gateInit == false)
 			initGate();
@@ -153,99 +254,9 @@ public class GateAnalysis {
 		}
 		tweetsRaw = excludeRepititve(tweetsRaw);
 		AnnotationSet sentenceSignal = d.getAnnotations().get("SentenceSignal");
-		getSignals(sentenceSignal, tweetsRaw, d);
 		
-		return true; 
-	}
-	private static List<Status> excludeRepititve(List<Status> t){
 		
-		Iterator<Status> t1 = t.iterator(); 
-		Iterator<Status> t2 = t.iterator();
-		while(t1.hasNext())
-		{
-			Status s1 = (Status) t1.next();
-			while(t2.hasNext()){
-				Status s2 = (Status) t2.next();
-				if(s1.getId()!= s2.getId() && s1.getText().equals(s2.getText()))
-				{	
-					t.remove(t.indexOf(s1));
-					t.get(t.indexOf(s2));
-				}
-			}
-		}
-		return t;
-		
-	}
-	@SuppressWarnings("deprecation")
-	private static List<Signal> getSignals(AnnotationSet signalsAnnot, List<Status> tweets, Document doc){
-		
-		AnnotationSet tweetsIDs = doc.getAnnotations().get("tweetID");
-		AnnotationSet currencyPair = doc.getAnnotations().get("CurrencyPair");
-		AnnotationSet currency = doc.getAnnotations().get("Currency");
-		AnnotationSet positiveSignal = doc.getAnnotations().get("PositiveSignal");
-		AnnotationSet negativeSignal = doc.getAnnotations().get("NegativeSignal");
-		AnnotationSet neutralSignal = doc.getAnnotations().get("NeutralSignal");
-		String signalText; 
-		for(Annotation annot : signalsAnnot){
-			Signal signal = new Signal();
-			Status currentTweet ; 
-			AnnotationSet tweetSpecificID = gate.Utils.getContainedAnnotations(tweetsIDs, annot);
-			
-			String sentencID  = gate.Utils.stringFor(doc, tweetSpecificID);
-			for(int e =0; e < tweets.size() - 1; e++){
-				// TODO Add more fields 
-				currentTweet = tweets.get(e);
-				if(currentTweet.getId() == Long.parseLong(sentencID))
-				{
-					signal.setTweetID(sentencID+"");
-					signal.setDateOfTweet(currentTweet.getCreatedAt());
-					if(gate.Utils.getContainedAnnotations(positiveSignal, annot) != null)
-					{
-						AnnotationSet s = gate.Utils.getContainedAnnotations(positiveSignal, annot);
-						AnnotationSet s1 = gate.Utils.getOverlappingAnnotations(positiveSignal, annot);
-						signalText = gate.Utils.stringFor(doc, s);
-						signal.setPolarity(true);
-					}
-					else if (gate.Utils.getContainedAnnotations(negativeSignal, annot) != null)
-					{
-						AnnotationSet s = gate.Utils.getContainedAnnotations(negativeSignal, annot);
-						AnnotationSet s1 = gate.Utils.getOverlappingAnnotations(negativeSignal, annot);
-						signalText = gate.Utils.stringFor(doc, s);
-						signal.setPolarity(false);
-					}
-					else
-					{
-						AnnotationSet s = gate.Utils.getContainedAnnotations(neutralSignal, annot);
-						signalText = gate.Utils.stringFor(doc, s);
-						signal.setPolarity(null);
-					}
-					signal.setTextBody(signalText);// or NegativeSignal ..polarity. 
-					if(gate.Utils.getContainedAnnotations(currencyPair, annot) != null)
-					{
-						AnnotationSet c = gate.Utils.getContainedAnnotations(currencyPair, annot);
-						signalText = gate.Utils.stringFor(doc, c);
-						signal.setCurrency(signalText);
-					}
-					else
-					{
-						AnnotationSet c = gate.Utils.getContainedAnnotations(currency, annot);
-						signalText = gate.Utils.stringFor(doc, c);
-						signal.setCurrency(signalText);
-					}
-					
-					signal.setSignalValue(currentTweet.getRetweetCount());
-					signal.setDateOfTweet(currentTweet.getCreatedAt());
-					//TODO fix the Logic with factual dates and times.
-					//TODO Fix the date time deprecated methods. 
-				    Date date = new Date();
-					signal.setTimeOfExcute(date);
-					date.setHours(date.getHours() + shortExcution); 
-					signal.setTimeOfDexcute(date);
-					signals.add(signal);
-				}
-				 
-			}
-		}
-		return signals;
+		//Before return Add the prices from Yahoo Finance in one call for this patch of signals. 
+		return SignalsDecider.addSignalPrices(getSignals(sentenceSignal, tweetsRaw, d));
 	}
 }

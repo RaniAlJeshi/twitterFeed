@@ -11,8 +11,9 @@ public class Signal{
 	private Date timeOfDexcute; 
 	private Integer signalValue;
 	private String tweetID; 
-	private double startNumber; 
+	private double buyNumber; 
 	private double stopNumber; 
+	private double bidNumber; 
 	
 	public Signal(){
 		
@@ -81,11 +82,11 @@ public class Signal{
 		this.signalValue = signalValue;
 	} 
 	public double getStartNumber() {
-		return startNumber;
+		return buyNumber;
 	}
 
 	public void setStartNumber(double startNumber) {
-		this.startNumber = startNumber;
+		this.buyNumber = startNumber;
 	}
 
 	public double getStopNumber() {
@@ -94,6 +95,14 @@ public class Signal{
 
 	public void setStopNumber(double stopNumber) {
 		this.stopNumber = stopNumber;
+	}
+
+	public double getBidNumber() {
+		return bidNumber;
+	}
+
+	public void setBidNumber(double bidNumber) {
+		this.bidNumber = bidNumber;
 	}
 	
 	
