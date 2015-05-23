@@ -257,6 +257,13 @@ public class GateAnalysis {
 		
 		
 		//Before return Add the prices from Yahoo Finance in one call for this patch of signals. 
-		return SignalsDecider.addSignalPrices(getSignals(sentenceSignal, tweetsRaw, d));
+		List<SignalNode> signalsToDecider = getSignals(sentenceSignal, tweetsRaw, d); 
+		if (signalsToDecider.size() > 0)
+			return SignalsDecider.addSignalPrices(signalsToDecider);
+		else
+		{
+			System.out.println("No singnals in this patch...."); 
+			return null;
+		}
 	}
 }
