@@ -39,13 +39,14 @@ public class Main {
 		//String yahooAppKey = HelperMethods.getPropValue("yahoo_consumer_key");
 		//String yahooAppSecret = HelperMethods.getPropValue("yahoo_consumer_secret");
 		//String query = "&q=select * from yahoo.finance.xchange where pair in %28" + currString + "%29&env=store://datatables.org/alltableswithkeys";
-		String fullUrlStr = "http://query.yahooapis.com/v1/public/yql?appid=null&q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20%28%22EURUSD%22%29&env=store://datatables.org/alltableswithkeys&format=json";
-		String resultUrl = null;
+		//String fullUrlStr = "http://query.yahooapis.com/v1/public/yql?appid=null&q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20%28%22EURUSD%22%29&env=store://datatables.org/alltableswithkeys&format=json";
+		
 		
 		//fullUrlStr = baseUrl  + query + "&format=json";
 	
 		try {
-			resultUrl = HelperMethods.readUrl(fullUrlStr);
+			
+			//String resultUrl = HelperMethods.readUrl(fullUrlStr);
 			//is = fullUrl.openStream();
 			JSONTokener token;
 			token = new JSONTokener("{\"query\":{\"count\":1,\"created\":\"2015-09-07T20:39:53Z\",\"lang\":\"en-US\",\"results\":{\"rate\":{\"id\":\"EURUSD\",\"Name\":\"EUR/USD\",\"Rate\":\"1.1169\",\"Date\":\"9/7/2015\",\"Time\":\"9:39pm\",\"Ask\":\"1.1170\",\"Bid\":\"1.1169\"}}}}");
